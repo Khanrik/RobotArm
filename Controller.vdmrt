@@ -3,6 +3,7 @@ class Controller
 instance variables
     public ctl_angle : real;
     public ctl_angle_target : real;
+    public ctl_velocity : real;
 
 operations
 public Controller : () ==> Controller
@@ -19,6 +20,21 @@ public SetTarget : real ==> ()
 public ReadAngle : () ==> ()
 ReadAngle() == (
     ctl_angle := ArmSystem`roboarm.env_angle;
+);
+
+public UpdateArmVelocity : () ==> ()
+UpdateArmVelocity() == (
+    -- find estimated velocity
+     ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
+            
+    -- protect from going over max velocity
+    if ctl_velocity > ArmSystem`roboarm.env_velocity_max then
+        ctl_velocity := ArmSystem`roboarm.env_velocity_max
+    elseif ctl_velocity < -ArmSystem`roboarm.env_velocity_max then
+        ctl_velocity := -ArmSystem`roboarm.env_velocity_max;
+
+    -- set the velocity
+    ArmSystem`roboarm.env_velocity := ctl_velocity;
 );
 
 end Controller
