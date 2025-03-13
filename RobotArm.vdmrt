@@ -8,7 +8,6 @@ instance variables
     public env_angle_target : real;
     public env_velocity_max : real;
     public env_velocity : real;
-    public env_velocity_target : real;
     
 operations
     public RobotArm: () ==> RobotArm
@@ -18,21 +17,20 @@ operations
         env_angle_target := 0;
         env_velocity_max := 1/16 * pi; -- 11.25 degrees per time unit
         env_velocity := 0;
-        env_velocity_target := 0;
     );
     
 
     public Step : real ==> ()
     Step(delta)== duration (0) (
         -- if controller gives step too high we arrange so it ends at max instead of overshooting
-        if env_angle + env_velocity * delta> env_angle_max then
-            env_velocity:= (env_angle_max-env_angle)/delta 
-        elseif env_angle + env_velocity * delta< 0 then
-            env_velocity:= (0-env_angle)/delta ;
+        if env_angle + env_velocity * delta > env_angle_max then
+            env_velocity:= (env_angle_max - env_angle) / delta 
+        elseif env_angle + env_velocity * delta < 0 then
+            env_velocity:= (0 - env_angle) / delta ;
         
         env_angle := env_angle + env_velocity * delta;
     )
-    pre env_angle_target >= 0 and env_angle_target <= env_angle_max
+    pre env_angle_target >= 0 and env_angle_target <= env_angle_max and env_velocity >= -env_velocity_max and env_velocity <= env_velocity_max
     post env_angle >= 0 and env_angle <= env_angle_max;
 
 end RobotArm
