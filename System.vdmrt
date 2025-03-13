@@ -1,0 +1,7 @@
+system ArmSystem
+instance variables
+
+    public static roboarm : RobotArm := new RobotArm();
+    public static robocon : Controller := new Controller();
+
+end ArmSystem

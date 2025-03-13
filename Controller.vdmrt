@@ -1,0 +1,24 @@
+class Controller
+instance variables
+    public ctl_angle : real;
+    public ctl_angle_target : real;
+
+
+operations
+public Controller : () ==> Controller
+Controller()==(
+    ctl_angle := 0;
+    ctl_angle_target := 0;
+);
+public SetTarget : real ==> ()
+    SetTarget(t) == (
+        ctl_angle_target := t;
+        ArmSystem`roboarm.env_angle_target := t;
+    );
+
+public ReadAngle : () ==> ()
+ReadAngle() == (
+    ctl_angle := ArmSystem`roboarm.env_angle;
+);
+
+end Controller

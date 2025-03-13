@@ -1,0 +1,75 @@
+class World
+instance variables
+    io : IO := new IO();
+operations
+    public echoState : (real) ==> () 
+    echoState(counter) == (
+        dcl str : seq of char := "";
+        str := str ^ VDMUtil`val2seq_of_char[real](counter);
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_angle);
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_angle_target);
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`robocon.ctl_angle_target);
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`robocon.ctl_angle);
+        str := str ^ "\n";
+        def - = io.echo(str) in skip;
+    );
+
+    public Scenario1 : () ==> bool
+    Scenario1() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        for i = 1 to 20 do (ArmSystem`roboarm.Step(40); echoState(i));
+        return true;
+    );
+
+    public Scenario2 : () ==> bool
+    Scenario2() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        ArmSystem`roboarm.Step(400);
+        echoState(1);
+        return true;
+    );
+    
+    public Scenario3 : () ==> bool
+    Scenario3() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        for i = 1 to 4 do (ArmSystem`roboarm.Step(600);echoState(i));
+        return true;
+    );
+
+    public Scenario4 : () ==> bool
+    Scenario4() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        echoState(1);
+        ArmSystem`roboarm.Step(550);
+        echoState(2);
+        ArmSystem`roboarm.Step(200);
+        echoState(3);
+        ArmSystem`roboarm.Step(100);
+        echoState(4);
+        ArmSystem`roboarm.Step(50);
+        echoState(5);
+        return true;
+    );
+
+    public Scenario5 : () ==> bool
+    Scenario5() == (
+        echoState(0);
+        ArmSystem`robocon.ReadAngle();
+        echoState(1);
+        ArmSystem`robocon.SetTarget(0.4);
+        echoState(2);
+        ArmSystem`roboarm.Step(40);
+        echoState(3);
+        ArmSystem`robocon.ReadAngle();
+        echoState(4);
+        return true;
+    );
+end World

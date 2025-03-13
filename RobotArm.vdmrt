@@ -1,0 +1,28 @@
+class RobotArm
+instance variables
+    env_angle_max : real; -- time
+    public env_angle : real;
+    public env_angle_target : real;
+    
+operations
+    public RobotArm: () ==> RobotArm
+    RobotArm() == (
+        env_angle_max := 1/4 * 3.14159265359; -- 45 degrees
+        env_angle := 0;
+        env_angle_target := 0;
+    );
+    
+
+    public Step : real ==> ()
+    Step(delta)== duration (0) (
+        dcl env_angle_vel : real := 0;
+
+        if (env_angle-env_angle_target > 0) then env_angle_vel := -0.001
+        else env_angle_vel := 0.001;
+        
+        env_angle := env_angle + (delta * env_angle_vel);
+    )
+    pre env_angle + (delta * (if env_angle - env_angle_target > 0 then -0.001 else 0.001)) >= 0 and env_angle + (delta * (if env_angle - env_angle_target > 0 then -0.001 else 0.001)) <= env_angle_max
+    post env_angle >= 0 and env_angle <= env_angle_max;
+
+end RobotArm
