@@ -14,7 +14,11 @@ operations
         str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`robocon.ctl_angle_target);
         str := str ^ ", ";
         str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`robocon.ctl_angle);
-        str := str ^ "\n";
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_velocity);
+        str := str ^ ", ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_velocity_target);
+        str := str ^ "\n ";
         def - = io.echo(str) in skip;
     );
 
@@ -39,7 +43,7 @@ operations
     Scenario3() == (
         echoState(0);
         ArmSystem`robocon.SetTarget(0.4);
-        for i = 1 to 4 do (ArmSystem`roboarm.Step(600);echoState(i));
+        for i = 1 to 4 do (ArmSystem`roboarm.Step(600); echoState(i));
         return true;
     );
 
@@ -72,4 +76,32 @@ operations
         echoState(4);
         return true;
     );
+
+    public Scenario6 : () ==> bool
+    Scenario6() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        echoState(1);
+        for i = 1 to 20 do (ArmSystem`roboarm.Step(110); echoState(i));
+        return true;
+    );
+
+    public Scenario7 : () ==> bool
+    Scenario7() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        echoState(1);
+        for i = 1 to 10 do (ArmSystem`roboarm.Step(200); echoState(i));
+        return true;
+    );
+
+    public Scenario8 : () ==> bool
+    Scenario8() == (
+        echoState(0);
+        ArmSystem`robocon.SetTarget(0.4);
+        echoState(1);
+        for i = 1 to 20 do (ArmSystem`roboarm.Step(50); echoState(i));
+        return true;
+    );
+    
 end World
