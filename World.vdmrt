@@ -16,8 +16,6 @@ operations
         str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`robocon.ctl_angle);
         str := str ^ ", ";
         str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_velocity);
-        str := str ^ ", ";
-        str := str ^ VDMUtil`val2seq_of_char[real](ArmSystem`roboarm.env_velocity_target);
         str := str ^ "\n ";
         def - = io.echo(str) in skip;
     );
