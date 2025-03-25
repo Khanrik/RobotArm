@@ -19,10 +19,10 @@ operations
     );
     public SetTarget : real ==> ()
     SetTarget(target) == (
-        dcl str : seq of char := "Old value ";
+        dcl str : seq of char := "Old target: ";
         target_is_set := false;
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_angle_target);
-        str := str ^ " New value: ";
+        str := str ^ " New target: ";
         ctl_angle_target := target;
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_angle_target);
         str := str ^ "\n";
@@ -37,7 +37,7 @@ operations
 
     public UpdateArmVelocity : () ==> ()
     UpdateArmVelocity() == (
-        dcl str : seq of char := "Old velocity ctl ";
+        dcl str : seq of char := "Old velocity ctl: ";
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
         -- find estimated velocity
         ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
