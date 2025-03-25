@@ -3,34 +3,92 @@ values
     pi = 3.14159265359;
 
 instance variables
+    io : IO := new IO();
     env_angle_max : real; -- time
-    public env_angle : real;
-    public env_angle_target : real;
-    public env_velocity_max : real;
-    public env_velocity : real;
-    
+    env_angle : real;
+    env_velocity_max : real;
+    env_velocity : real;
+    final_sim_time : real;
+
+    final_sim_time_is_set : bool;
+    velocity_is_set : bool;
+
 operations
     public RobotArm: () ==> RobotArm
     RobotArm() == (
         env_angle_max := 1/2 * pi; -- 90 degrees
         env_angle := 0;
-        env_angle_target := 0;
         env_velocity_max := 1/16 * pi; -- 11.25 degrees per time unit
         env_velocity := 0;
+        final_sim_time := 100;
+
+        final_sim_time_is_set := true;
+        velocity_is_set := true;
+    );
+
+    public SetFinalSimTime : real ==> ()
+    SetFinalSimTime (FinalSim)==(
+        final_sim_time_is_set := false;
+        final_sim_time := FinalSim;
+        final_sim_time_is_set := true;
+    );
+
+    public SetVelocity: real ==> ()
+    SetVelocity(velocity) == (
+        dcl str : seq of char := "Old velocity: ";
+        velocity_is_set := false;
+
+        str := str ^ VDMUtil`val2seq_of_char[real](velocity);
+        str := str ^ " New velocity: ";
+
+
+        env_velocity := velocity;
+        
+        str := str ^ VDMUtil`val2seq_of_char[real](velocity);
+        str := str ^ "\n";
+        def - = io.echo(str) in skip;
+        
+        velocity_is_set := true;
+    );
+
+    public GetAngle: () ==> real
+    GetAngle() == (
+        return env_angle;
     );
     
+    public GetMaxVelocity: () ==> real
+    GetMaxVelocity() == (
+        return env_velocity_max;
+    );
 
     public Step : real ==> ()
     Step(delta)== duration (0) (
+        dcl str : seq of char := "Old angle: ";
+        dcl str2 : seq of char := "Old velocity: ";
+        str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
+        str2 := str2 ^ " New velocity: ";
+
         -- if controller gives step too high we arrange so it ends at max instead of overshooting
         if env_angle + env_velocity * delta > env_angle_max then
             env_velocity:= (env_angle_max - env_angle) / delta 
         elseif env_angle + env_velocity * delta < 0 then
             env_velocity:= (0 - env_angle) / delta ;
-        
+        str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
+        str2 := str2 ^ "\n";
+
+        str := str ^ VDMUtil`val2seq_of_char[real](env_angle);
+        str := str ^ " New angle: ";
         env_angle := env_angle + env_velocity * delta;
+        str := str ^ VDMUtil`val2seq_of_char[real](env_angle);
+        str := str ^ "\n";
+        def - = io.echo(str) in skip;
+        def - = io.echo(str2) in skip;
     )
-    pre env_angle_target >= 0 and env_angle_target <= env_angle_max and env_velocity >= -env_velocity_max and env_velocity <= env_velocity_max
+    pre delta > 0 and env_velocity >= -env_velocity_max and env_velocity <= env_velocity_max
     post env_angle >= 0 and env_angle <= env_angle_max;
+
+sync
+    per SetFinalSimTime  => (final_sim_time_is_set = true);
+    per SetVelocity => (velocity_is_set = true);
 
 end RobotArm

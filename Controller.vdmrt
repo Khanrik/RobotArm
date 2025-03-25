@@ -1,40 +1,72 @@
 -- This is the controller
 class Controller
 instance variables
-    public ctl_angle : real;
-    public ctl_angle_target : real;
-    public ctl_velocity : real;
+    io : IO := new IO();
+    ctl_angle : real;
+    ctl_angle_target : real;
+    ctl_velocity : real;
+    target_is_set : bool;
+
 
 operations
-public Controller : () ==> Controller
-Controller()==(
-    ctl_angle := 0;
-    ctl_angle_target := 0;
-);
-public SetTarget : real ==> ()
-    SetTarget(t) == (
-        ctl_angle_target := t;
-        ArmSystem`roboarm.env_angle_target := t;
+    public Controller : () ==> Controller
+    Controller()==(
+        ctl_angle := 0;
+        ctl_angle_target := 0;
+        ctl_velocity := 0;
+        
+        target_is_set := true;
+    );
+    public SetTarget : real ==> ()
+    SetTarget(target) == (
+        dcl str : seq of char := "Old value ";
+        target_is_set := false;
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_angle_target);
+        str := str ^ " New value: ";
+        ctl_angle_target := target;
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_angle_target);
+        str := str ^ "\n";
+        def - = io.echo(str) in skip;
+        target_is_set := true;
     );
 
-public ReadAngle : () ==> ()
-ReadAngle() == (
-    ctl_angle := ArmSystem`roboarm.env_angle;
-);
+    public GetAngle : () ==> ()
+    GetAngle() == (
+        ctl_angle := ArmSystem`roboarm.GetAngle();
+    );
 
-public UpdateArmVelocity : () ==> ()
-UpdateArmVelocity() == (
-    -- find estimated velocity
-     ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
-            
-    -- protect from going over max velocity
-    if ctl_velocity > ArmSystem`roboarm.env_velocity_max then
-        ctl_velocity := ArmSystem`roboarm.env_velocity_max
-    elseif ctl_velocity < -ArmSystem`roboarm.env_velocity_max then
-        ctl_velocity := -ArmSystem`roboarm.env_velocity_max;
+    public UpdateArmVelocity : () ==> ()
+    UpdateArmVelocity() == (
+        dcl str : seq of char := "Old velocity ctl ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
+        -- find estimated velocity
+        ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
+        
+        -- protect from going over max velocity
+        if ctl_velocity > ArmSystem`roboarm.GetMaxVelocity() then
+            ctl_velocity := ArmSystem`roboarm.GetMaxVelocity()
+        elseif ctl_velocity < -ArmSystem`roboarm.GetMaxVelocity() then
+            ctl_velocity := -ArmSystem`roboarm.GetMaxVelocity();
 
-    -- set the velocity
-    ArmSystem`roboarm.env_velocity := ctl_velocity;
-);
+        -- set the velocity in the RobotArm
+        ArmSystem`roboarm.SetVelocity(ctl_velocity);
+        
+        str := str ^ " New velocity ctl: ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
+        str := str ^ "\n";
+        def - = io.echo(str) in skip;
+    );
+
+    public Increment : () ==> ()
+    Increment() == (
+        UpdateArmVelocity();
+        ArmSystem`roboarm.Step(10);
+    );
+
+thread
+    periodic(2,0,0,0)(Increment);
+
+sync 
+    per SetTarget=> (target_is_set = true);
 
 end Controller

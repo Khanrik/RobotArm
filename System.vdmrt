@@ -3,5 +3,16 @@ instance variables
 
     public static roboarm : RobotArm := new RobotArm();
     public static robocon : Controller := new Controller();
+    cpu1:CPU := new CPU(<FCFS>,1E9);
+    cpu2:CPU := new CPU(<FCFS>,1E9);
+
+    bus1:BUS := new BUS (<FCFS>,1E100,{cpu1,cpu2})
+
+operations 
+    public ArmSystem: () ==> ArmSystem
+    ArmSystem() == (
+        cpu1.deploy(roboarm);
+        cpu1.deploy(robocon);
+    );
 
 end ArmSystem
