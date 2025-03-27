@@ -7,6 +7,7 @@ instance variables
     ctl_velocity : real;
     target_is_set : bool;
 
+    moving_state: <Moving> | <Stopped>;
 
 operations
     public Controller : () ==> Controller
@@ -14,11 +15,13 @@ operations
         ctl_angle := 0;
         ctl_angle_target := 0;
         ctl_velocity := 0;
+
+        moving_state := <Stopped>;
         
         target_is_set := true;
     );
     public SetTarget : real ==> ()
-    SetTarget(target) == (
+    SetTarget(target) == duration(1E6) (
         dcl str : seq of char := "Old target: ";
         target_is_set := false;
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_angle_target);
@@ -31,16 +34,21 @@ operations
     );
 
     public GetAngle : () ==> ()
-    GetAngle() == (
+    GetAngle() == duration(1E7) (
         ctl_angle := ArmSystem`roboarm.GetAngle();
     );
 
     public UpdateArmVelocity : () ==> ()
-    UpdateArmVelocity() == (
+    UpdateArmVelocity() == duration(2E6) (
         dcl str : seq of char := "Old velocity ctl: ";
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
         -- find estimated velocity
         ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
+
+        if(ctl_angle_target - ctl_angle < 0.1 and ctl_angle_target - ctl_angle > -0.1) then
+            moving_state := <Stopped>
+        else
+            moving_state := <Moving>;
         
         -- protect from going over max velocity
         if ctl_velocity > ArmSystem`roboarm.GetMaxVelocity() then
@@ -48,6 +56,9 @@ operations
         elseif ctl_velocity < -ArmSystem`roboarm.GetMaxVelocity() then
             ctl_velocity := -ArmSystem`roboarm.GetMaxVelocity();
 
+        if(moving_state = <Stopped>) then
+            ctl_velocity := 0;
+    
         -- set the velocity in the RobotArm
         ArmSystem`roboarm.SetVelocity(ctl_velocity);
         
@@ -56,15 +67,6 @@ operations
         str := str ^ "\n";
         def - = io.echo(str) in skip;
     );
-
-    public Increment : () ==> ()
-    Increment() == (
-        UpdateArmVelocity();
-        ArmSystem`roboarm.Step(10);
-    );
-
-thread
-    periodic(2,0,0,0)(Increment);
 
 sync 
     per SetTarget=> (target_is_set = true);
