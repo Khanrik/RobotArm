@@ -1,0 +1,26 @@
+class PotentioMeter
+types
+    
+values
+    
+instance variables
+    io : IO := new IO();
+    snr_angle: real;
+
+operations
+    public PotentioMeter: () ==> PotentioMeter
+    PotentioMeter() == (
+        snr_angle := 0;
+    );
+    
+    public GetAngle: () ==> real
+    GetAngle()==duration(1E6)(
+        return snr_angle;
+    );
+
+    public Step:()==>()
+    Step()== duration(0)(
+        snr_angle := ArmSystem`roboarm.GetAngle();
+    );
+
+end PotentioMeter

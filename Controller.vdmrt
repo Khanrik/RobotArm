@@ -1,10 +1,17 @@
 -- This is the controller
 class Controller
+
+values
+    pi = 3.14159265359;
+    ctl_torque_max=1/16*pi;
+    
 instance variables
     io : IO := new IO();
     ctl_angle : real;
     ctl_angle_target : real;
-    ctl_velocity : real;
+
+    ctl_torque : real;
+
     target_is_set : bool;
 
     moving_state: <Moving> | <Stopped>;
@@ -14,7 +21,7 @@ operations
     Controller()==(
         ctl_angle := 0;
         ctl_angle_target := 0;
-        ctl_velocity := 0;
+        ctl_torque := 0;
 
         moving_state := <Stopped>;
         
@@ -33,37 +40,37 @@ operations
         target_is_set := true;
     );
 
-    public GetAngle : () ==> ()
-    GetAngle() == duration(1E7) (
-        ctl_angle := ArmSystem`roboarm.GetAngle();
+    public ReadAngle : () ==> ()
+    ReadAngle() == duration(1E7) (
+        ctl_angle := ArmSystem`potentio.GetAngle();
     );
 
-    public UpdateArmVelocity : () ==> ()
-    UpdateArmVelocity() == duration(2E6) (
-        dcl str : seq of char := "Old velocity ctl: ";
-        str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
-        -- find estimated velocity
-        ctl_velocity := (ctl_angle_target - ctl_angle) / 100;
+    public UpdateArmtorque : () ==> ()
+    UpdateArmtorque() == duration(2E6) (
+        dcl str : seq of char := "Old torque ctl: ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_torque);
+        -- find estimated torque
+        ctl_torque := (ctl_angle_target - ctl_angle) / 100;
 
         if(ctl_angle_target - ctl_angle < 0.1 and ctl_angle_target - ctl_angle > -0.1) then
             moving_state := <Stopped>
         else
             moving_state := <Moving>;
         
-        -- protect from going over max velocity
-        if ctl_velocity > ArmSystem`roboarm.GetMaxVelocity() then
-            ctl_velocity := ArmSystem`roboarm.GetMaxVelocity()
-        elseif ctl_velocity < -ArmSystem`roboarm.GetMaxVelocity() then
-            ctl_velocity := -ArmSystem`roboarm.GetMaxVelocity();
+        -- protect from going over max torque
+        if ctl_torque > ctl_torque_max then
+            ctl_torque := ctl_torque_max
+        elseif ctl_torque < -ctl_torque_max then
+            ctl_torque := -ctl_torque_max;
 
         if(moving_state = <Stopped>) then
-            ctl_velocity := 0;
+            ctl_torque := 0;
     
-        -- set the velocity in the RobotArm
-        ArmSystem`roboarm.SetVelocity(ctl_velocity);
+        -- set the torque in the RobotArm
+        ArmSystem`motor.SetTorque(ctl_torque);
         
-        str := str ^ " New velocity ctl: ";
-        str := str ^ VDMUtil`val2seq_of_char[real](ctl_velocity);
+        str := str ^ " New torque ctl: ";
+        str := str ^ VDMUtil`val2seq_of_char[real](ctl_torque);
         str := str ^ "\n";
         def - = io.echo(str) in skip;
     );

@@ -1,0 +1,19 @@
+class Motor
+
+instance variables
+    act_torque : real;
+
+operations
+    public Motor: () ==> Motor
+    Motor() == (
+        act_torque := 0;
+        
+    );
+    
+    public SetTorque: real ==> ()
+    SetTorque(torque) == duration(1E6) (
+        act_torque := torque;
+        ArmSystem`roboarm.SetMotorTorque(act_torque);
+    );
+
+end Motor
