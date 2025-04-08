@@ -1,14 +1,21 @@
+
+
 class RobotArm
 values
     pi = 3.14159265359;
     mass = 10;
     length = 1;
+    radius = 0.1;
     gravitational_acc = -9.81584 ;
     coulomb_friction=  0.1;
     viscous_friction= 0.05;
     
-    env_angle_max= 1/16*pi;
+    env_angle_max= 1/2*pi;
     env_angle_min= 0;
+
+    inertia = 1/4 * mass * radius**2 + 1/3 * mass * length**2;
+
+
 instance variables
     io : IO := new IO();
 
@@ -26,9 +33,6 @@ instance variables
     torque_gravity: real;
     torque_friction: real;
     torque_motor: real;
-    inertia: real;
-
-    velocity_is_set: bool;
 
 operations
     public RobotArm: () ==> RobotArm
@@ -39,16 +43,13 @@ operations
         final_sim_time := 100;
         final_sim_time_is_set := true;
 
-        velocity_is_set := true;
-
         last_time := 0;
         
-        env_acceleration:=0;
+        env_acceleration := 0;
 
-        torque_gravity:=0;
-        torque_friction:=0;
-        torque_motor:=0;
-        inertia:=0;
+        torque_gravity := 0;
+        torque_friction := 0;
+        torque_motor := 0;
     );
 
     public SetFinalSimTime : real ==> ()
@@ -67,7 +68,7 @@ operations
     public SetMotorTorque: real ==> ()
     SetMotorTorque(torque) == duration(1E6) (
         dcl str : seq of char := "Old torque: ";
-        str := str ^ VDMUtil`val2seq_of_char[real](torque);
+        str := str ^ VDMUtil`val2seq_of_char[real](torque_motor);
         str := str ^ " New torque: ";
         torque_motor := torque;
         str := str ^ VDMUtil`val2seq_of_char[real](torque_motor);
@@ -86,12 +87,18 @@ operations
 
         str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
         str2 := str2 ^ " New velocity: ";
+        
+        env_acceleration := torque_motor / inertia;
 
+        env_velocity := env_acceleration * delta;
+        
         -- if controller gives step too high we arrange so it ends at max instead of overshooting
         if env_angle + env_velocity * delta > env_angle_max then
             env_velocity:= (env_angle_max - env_angle) / delta 
         elseif env_angle + env_velocity * delta < 0 then
             env_velocity:= (0 - env_angle) / delta;
+
+
 
         str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
         str2 := str2 ^ "\n";
