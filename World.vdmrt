@@ -22,7 +22,7 @@ operations
     public Scenario2 : () ==> bool
     Scenario2() == (
         ArmSystem`robocon.SetTarget(0.4);
-        for i = 1 to 40 do duration(1E7) ( 
+        for i = 1 to 40 do duration(1E6) ( 
             dcl str : seq of char := "time: ";
             ArmSystem`robocon.ReadAngle();
             ArmSystem`robocon.UpdateArmtorque();  
