@@ -50,7 +50,7 @@ operations
 
     public ReadAngle : () ==> ()
     ReadAngle() == duration(1E7) (
-        dcl new_angle : real := ArmSystem`roboarm.GetAngle();
+        dcl new_angle : real := ArmSystem`potentio.GetAngle();
         if(abs(new_angle - ctl_angle) > 0.5) then ( -- Stop if the current angle is too far from the target
             controller_state := <Stop>;
 
