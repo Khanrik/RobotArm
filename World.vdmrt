@@ -4,6 +4,7 @@ instance variables
 operations
     public Scenario1 : () ==> bool
     Scenario1() == (
+        ArmSystem`robocon.Init();
         ArmSystem`robocon.SetTarget(0.4);
         for i = 1 to 40 do (
             dcl str : seq of char := "time: ";
@@ -53,6 +54,7 @@ operations
 
     public Scenario4 : () ==> bool
     Scenario4() == (
+        ArmSystem`robocon.Init();
         ArmSystem`robocon.SetTarget(0.4);
         for i = 1 to 40 do duration(1E8) (
             dcl str : seq of char := "time: ";
@@ -66,5 +68,5 @@ operations
             );
         return true;
     );
-    
+
 end World

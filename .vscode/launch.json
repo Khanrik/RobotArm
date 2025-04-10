@@ -6,7 +6,7 @@
             "request": "launch",
             "noDebug": true,
             "defaultName": "World",
-            "command": "p new World().Scenario2()"
+            "command": "p new World().Scenario4()"
         }
     ]
 }
