@@ -50,7 +50,8 @@ operations
         dcl str : seq of char := "Old torque ctl: ";
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_torque);
         -- find estimated torque
-        ctl_torque := (ctl_angle_target - ctl_angle) / 200;
+        if(moving_state = <Moving>) then
+            ctl_torque := (ctl_angle_target - ctl_angle)/100;
 
         if(ctl_angle_target - ctl_angle < 0.1 and ctl_angle_target - ctl_angle > -0.1) then
             moving_state := <Stopped>

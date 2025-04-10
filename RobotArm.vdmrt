@@ -53,7 +53,7 @@ operations
     );
 
     public SetFinalSimTime : real ==> ()
-    SetFinalSimTime (FinalSim)==(
+    SetFinalSimTime (FinalSim) == duration(1E6) (
         final_sim_time_is_set := false;
         final_sim_time := FinalSim;
         final_sim_time_is_set := true;
@@ -61,7 +61,7 @@ operations
 
     
     public GetAngle:() ==> real
-    GetAngle()==duration(0)(
+    GetAngle() == duration(1E6)(
         return env_angle
     );
     
