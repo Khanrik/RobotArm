@@ -53,7 +53,7 @@ operations
         if(moving_state = <Moving>) then
             ctl_torque := (ctl_angle_target - ctl_angle)/100;
 
-        if(ctl_angle_target - ctl_angle < 0.1 and ctl_angle_target - ctl_angle > -0.1) then
+        if(ctl_angle_target - ctl_angle < 0.01 and ctl_angle_target - ctl_angle > -0.01) then
             moving_state := <Stopped>
         else
             moving_state := <Moving>;
