@@ -4,11 +4,23 @@ class Controller
 values
     pi = 3.14159265359;
     ctl_torque_max=1/16*pi;
+    Kp = 1/100;
+    Kd = 1/100;
+    gravitational_acc = -9.81584;
+
+    mass = 10;
+    length = 1;
     
 instance variables
     io : IO := new IO();
+    math : MATH := new MATH();
+
     ctl_angle : real;
     ctl_angle_target : real;
+    
+    prev_error : real := 0; -- for PD regulator
+
+    prev_time : real := 0; -- for PD regulator
 
     ctl_torque : real;
 
@@ -62,6 +74,7 @@ operations
     public UpdateArmtorque : () ==> ()
     UpdateArmtorque() == duration(2E6) (
         dcl str : seq of char := "Old torque ctl: ";
+        dcl gravity_comp : real := 0;
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_torque);
 
         if(controller_state = <Stop>) then (
@@ -78,7 +91,10 @@ operations
 
         -- find estimated torque
         if(moving_state = <Moving>) then
-            ctl_torque := (ctl_angle_target - ctl_angle)/100;
+            gravity_comp := mass * -gravitational_acc * length * math.cos(ctl_angle);
+
+            ctl_torque := PDControl();
+            --ctl_torque := (ctl_angle_target - ctl_angle)/100;
 
         if(ctl_angle_target - ctl_angle < 0.01 and ctl_angle_target - ctl_angle > -0.01) then
             moving_state := <Stopped>
@@ -101,6 +117,20 @@ operations
         str := str ^ VDMUtil`val2seq_of_char[real](ctl_torque);
         str := str ^ "\n";
         def - = io.echo(str) in skip;
+    );
+    
+    PDControl : () ==> real
+    PDControl() == duration(0) (
+        dcl e : real := ctl_angle_target - ctl_angle;
+        dcl the_time : real := time / 1e6; -- convert to milliseconds
+        dcl delta : real := the_time - prev_time;
+        dcl de : real := (e - prev_error) / delta; 
+        dcl torque : real := Kp * e + Kd * de;
+
+        prev_error := e;
+        prev_time := the_time;
+
+        return torque;
     );
 
     public Init : () ==> ()

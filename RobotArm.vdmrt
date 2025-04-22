@@ -1,14 +1,12 @@
-
-
 class RobotArm
 values
     pi = 3.14159265359;
     mass = 10;
     length = 1;
     radius = 0.1;
-    gravitational_acc = -9.81584 ;
-    coulomb_friction=  0.1;
-    viscous_friction= 0.05;
+    gravitational_acc = -9.81584;
+    coulomb_friction=  0; --0.1;
+    viscous_friction= 0; --0.05;
     
     env_angle_max= 1/2*pi;
     env_angle_min= 0;
@@ -18,6 +16,7 @@ values
 
 instance variables
     io : IO := new IO();
+    math : MATH := new MATH();
 
     final_sim_time : real;
     final_sim_time_is_set : bool;
@@ -52,12 +51,12 @@ operations
         torque_motor := 0;
     );
 
-    public SetFinalSimTime : real ==> ()
-    SetFinalSimTime (FinalSim) == duration(1E6) (
-        final_sim_time_is_set := false;
-        final_sim_time := FinalSim;
-        final_sim_time_is_set := true;
-    );
+    -- public SetFinalSimTime : real ==> ()
+    -- SetFinalSimTime (FinalSim) == duration(0) (
+    --     final_sim_time_is_set := false;
+    --     final_sim_time := FinalSim;
+    --     final_sim_time_is_set := true;
+    -- );
 
     
     public GetAngle:() ==> real
@@ -81,14 +80,18 @@ operations
     Step()== duration (0) (
         dcl str : seq of char := "Old angle: ";
         dcl str2 : seq of char := "Old velocity: ";
+        
         dcl t: real := time / 1E6;
         dcl delta: real := (t - last_time);
+        torque_gravity := mass * gravitational_acc * length * math.cos(env_angle);
+        torque_friction := viscous_friction * -env_velocity;
         last_time := t;
 
         str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
         str2 := str2 ^ " New velocity: ";
+
         
-        env_acceleration := torque_motor / inertia;
+        env_acceleration := (torque_motor + torque_gravity + torque_friction)/ inertia;
 
         env_velocity := env_acceleration * delta;
         
@@ -117,6 +120,6 @@ operations
     post env_angle >= 0 and env_angle <= env_angle_max;
 
 sync
-    per SetFinalSimTime  => (final_sim_time_is_set = true);
+    --per SetFinalSimTime  => (final_sim_time_is_set = true);
     
 end RobotArm
