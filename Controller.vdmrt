@@ -89,10 +89,9 @@ operations
             return;
         );
 
+        gravity_comp := mass * -gravitational_acc * length * math.cos(ctl_angle);
         -- find estimated torque
         if(moving_state = <Moving>) then
-            gravity_comp := mass * -gravitational_acc * length * math.cos(ctl_angle);
-
             ctl_torque := PDControl() + gravity_comp;
             --ctl_torque := (ctl_angle_target - ctl_angle)/100;
 
@@ -108,7 +107,7 @@ operations
             ctl_torque := -ctl_torque_max;
 
         if(moving_state = <Stopped>) then
-            ctl_torque := 0;
+            ctl_torque := gravity_comp;
     
         -- set the torque in the RobotArm
         ArmSystem`motor.SetTorque(ctl_torque);
