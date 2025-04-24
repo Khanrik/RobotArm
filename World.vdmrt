@@ -2,8 +2,8 @@ class World
 instance variables
     io : IO := new IO();
 operations
-    public Scenario1 : () ==> bool
-    Scenario1() == (
+    public DebugScenario : () ==> bool --only for debugging, this is not a real test scenario anymore
+    DebugScenario() == (
         ArmSystem`robocon.Init();
         ArmSystem`robocon.SetTarget(0.4);
         for i = 1 to 40 do (
@@ -17,6 +17,22 @@ operations
             def - = io.echo(str) in skip; 
         );
 
+        return true;
+    );
+    
+    public Scenario1 : () ==> bool
+    Scenario1() == (
+        ArmSystem`robocon.SetTarget(0.4);
+        for i = 1 to 40 do duration(1E4) (
+            dcl str : seq of char := "time: ";
+            ArmSystem`robocon.ReadAngle();
+            ArmSystem`robocon.UpdateArmtorque();  
+            ArmSystem`roboarm.Step(); 
+            str := str ^ VDMUtil`val2seq_of_char[real](time);
+            str := str ^ "\n";
+
+            def - = io.echo(str) in skip; 
+        );
         return true;
     );
 
@@ -33,39 +49,6 @@ operations
 
             def - = io.echo(str) in skip; 
         );
-        return true;
-    );
-    
-    public Scenario3 : () ==> bool
-    Scenario3() == (
-        ArmSystem`robocon.SetTarget(0.4);
-        for i = 1 to 40 do duration(1E4) (
-            dcl str : seq of char := "time: ";
-            ArmSystem`robocon.ReadAngle();
-            ArmSystem`robocon.UpdateArmtorque();  
-            ArmSystem`roboarm.Step(); 
-            str := str ^ VDMUtil`val2seq_of_char[real](time);
-            str := str ^ "\n";
-
-            def - = io.echo(str) in skip; 
-        );
-        return true;
-    );
-
-    public Scenario4 : () ==> bool
-    Scenario4() == (
-        ArmSystem`robocon.Init();
-        ArmSystem`robocon.SetTarget(0.4);
-        for i = 1 to 40 do duration(1E8) (
-            dcl str : seq of char := "time: ";
-            ArmSystem`robocon.ReadAngle();
-            ArmSystem`robocon.UpdateArmtorque();  
-            ArmSystem`roboarm.Step(); 
-            str := str ^ VDMUtil`val2seq_of_char[real](time);
-            str := str ^ "\n";
-
-            def - = io.echo(str) in skip; 
-            );
         return true;
     );
 

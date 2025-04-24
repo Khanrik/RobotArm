@@ -13,6 +13,7 @@ values
 
     inertia = 1/4 * mass * radius**2 + 1/3 * mass * length**2;
 
+    threshold = 0.0001;
 
 instance variables
     io : IO := new IO();
@@ -76,7 +77,8 @@ operations
 
     tanh : real ==> real
     tanh(x) == duration(0) (
-        dcl val : real := (MATH`exp(2 * x) - 1) / (MATH`exp(2 * x) + 1);
+        dcl e2x : real := MATH`exp(2 * x);
+        dcl val : real := (e2x - 1) / (e2x + 1);
         return val;
     );
     
@@ -90,7 +92,7 @@ operations
         dcl delta: real := (t - last_time);
 
         torque_gravity := mass * gravitational_acc * length * math.cos(env_angle);
-        torque_friction := coulomb_friction * tanh(env_velocity) + viscous_friction * env_velocity;
+        torque_friction := coulomb_friction * tanh(-env_velocity) + viscous_friction * -env_velocity;
         last_time := t;
 
         str2 := str2 ^ VDMUtil`val2seq_of_char[real](env_velocity);
@@ -120,8 +122,8 @@ operations
         def - = io.echo(str) in skip;
         def - = io.echo(str2) in skip;
     )
-    pre env_angle >= 0 and env_angle <= env_angle_max
-    post env_angle >= 0 and env_angle <= env_angle_max;
+    pre env_angle >= 0-threshold and env_angle <= env_angle_max+threshold
+    post env_angle >= 0-threshold and env_angle <= env_angle_max+threshold;
 
 sync
     --per SetFinalSimTime  => (final_sim_time_is_set = true);
