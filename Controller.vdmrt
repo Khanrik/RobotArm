@@ -3,7 +3,7 @@ class Controller
 
 values
     pi = 3.14159265359;
-    ctl_torque_max=1/16*pi;
+    ctl_torque_max=100;
     Kp = 1/100;
     Kd = 1/100;
     gravitational_acc = -9.81584;
@@ -93,7 +93,7 @@ operations
         if(moving_state = <Moving>) then
             gravity_comp := mass * -gravitational_acc * length * math.cos(ctl_angle);
 
-            ctl_torque := PDControl();
+            ctl_torque := PDControl() + gravity_comp;
             --ctl_torque := (ctl_angle_target - ctl_angle)/100;
 
         if(ctl_angle_target - ctl_angle < 0.01 and ctl_angle_target - ctl_angle > -0.01) then
