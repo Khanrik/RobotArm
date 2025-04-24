@@ -3,7 +3,7 @@ class Controller
 
 values
     pi = 3.14159265359;
-    ctl_torque_max=100;
+    ctl_torque_max=10000;
     Kp = 1/100;
     Kd = 1/100;
     gravitational_acc = -9.81584;

@@ -5,8 +5,8 @@ values
     length = 1;
     radius = 0.1;
     gravitational_acc = -9.81584;
-    coulomb_friction=  0; --0.1;
-    viscous_friction= 0; --0.05;
+    coulomb_friction=  0.1;
+    viscous_friction= 0.05;
     
     env_angle_max= 1/2*pi;
     env_angle_min= 0;
@@ -93,7 +93,7 @@ operations
         
         env_acceleration := (torque_motor + torque_gravity + torque_friction)/ inertia;
 
-        env_velocity := env_acceleration * delta;
+        env_velocity := env_velocity + env_acceleration * delta;
         
         -- if controller gives step too high we arrange so it ends at max instead of overshooting
         if env_angle + env_velocity * delta > env_angle_max then
